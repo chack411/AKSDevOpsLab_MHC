@@ -141,7 +141,7 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
 ## 演習 1: ビルド & リリース パイプラインの構成
 
 [Azure DevOps デモ ジェネレータ](https://azuredevopsdemogenerator.azurewebsites.net/?TemplateId=77372&Name=AKS) を通じて、Azure DevOps 組織で AKS プロジェクトを作成していることを確認します (詳細は環境準備の章を参照してください)。AKS や Azure コンテナー レジストリ (ACR) などの Azure リソースをビルド定義とリリース定義に手動でマップします。
-
+
 1. Azure DevOps で作成したチームプロジェクトを開き、**Pipelines → Pipelines** を表示します。
 
       ![build](images/pipelines.png)

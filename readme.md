@@ -30,7 +30,7 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
 
 ## 環境準備
 
-1. [はじめに](../Setup/) を参照して、この演習に必要な事前準備を確認します。
+1. [はじめに](setup.md) を参照して、この演習に必要な事前準備を確認します。
 
 2. [Azure DevOps デモ ジェネレータ](https://azuredevopsdemogenerator.azurewebsites.net/?TemplateId=77372&Name=AKS) リンクをクリックし、ベースとなるデモプロジェクトを **Azure DevOps** にプロビジョニングします。
 

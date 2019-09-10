@@ -36,7 +36,7 @@ The following tasks will be performed:
 
 ## Before you begin
 
-1. Refer the [Getting Started](../Setup/) page to know the prerequisites for this lab.
+1. Refer the [Getting Started](setup.md) page to know the prerequisites for this lab.
 
 1. Click the [Azure DevOps Demo Generator](https://azuredevopsdemogenerator.azurewebsites.net/?TemplateId=77372&Name=AKS){:target="_blank"} link and follow the instructions in [Getting Started](../Setup/) page to provision the project to your **Azure DevOps**.
 

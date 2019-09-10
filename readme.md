@@ -1,222 +1,235 @@
----
-title: Deploying a multi-container application to Azure Kubernetes Services
-layout: page
-sidebar: vsts2
-permalink: /labs/vstsextend/kubernetes/
-folder: /labs/vstsextend/kubernetes/
----
-<div class="rw-ui-container"></div>
+# Azure DevOps を利用した AKS へのマルチコンテナーアプリケーションの CI/CD 構成
 
-## Overview
+> Original lab in English is: [Deploying a multi-container application to Azure Kubernetes Services](https://github.com/microsoft/azuredevopslabs/tree/master/labs/vstsextend/kubernetes)
 
-[**Azure Kubernetes Service (AKS)**](https://azure.microsoft.com/en-us/services/kubernetes-service/){:target="_blank"} is the quickest way to use Kubernetes on Azure. **Azure Kubernetes Service (AKS)** manages your hosted Kubernetes environment, making it quick and easy to deploy and manage containerized applications without container orchestration expertise. It also eliminates the burden of ongoing operations and maintenance by provisioning, upgrading, and scaling resources on demand, without taking your applications offline. Azure DevOps helps in creating Docker images for faster deployments and reliability using the continuous build option.
+## 概要
 
-One of the biggest advantage to use AKS is that instead of creating resources in cloud you can create resources and infrastructure inside Azure Kubernetes Cluster through Deployments and Services manifest files.
+[**Azure Kubernetes Service (AKS)**](https://azure.microsoft.com/en-us/services/kubernetes-service/) は、Azure で Kubernetes を使用する最も簡単な方法です。**Azure Kubernetes Service (AKS)** は、ホストされた Kubernetes 環境を管理し、コンテナー オーケストレーションの専門知識を持たずに、コンテナー化されたアプリケーションを迅速かつ簡単にデプロイおよび管理できるようにします。また、アプリケーションをオフラインにすることなく、リソースをオンデマンドでプロビジョニング、アップグレード、およびスケーリングすることにより、継続的な運用と保守の負担を軽減します。Azure DevOps は、継続的なビルド オプションを使用して、デプロイと信頼性を向上させる Docker イメージの作成に役立ちます。
+AKS を使用する最大の利点の 1 つは、クラウドでリソースを作成する代わりに、デプロイとサービス マニフェスト ファイルを通じて Azure Kubernetes クラスター内にリソースとインフラストラクチャを作成できることです。
 
-### Lab Scenario
+### ラボ シナリオ
 
-This lab uses a Dockerized ASP.NET Core web application - **MyHealthClinic** (MHC) and is deployed to a **Kubernetes** cluster running on **Azure Kubernetes Service (AKS)** using **Azure DevOps**.
-> There is a  **mhc-aks.yaml** manifest file which consists of definitions to spin up Deployments and Services such as **Load Balancer** in the front and **Redis Cache** in the backend. The MHC application will be running in the mhc-front pod along with the Load Balancer.
+このラボでは、Docker 化された ASP.NET Core Web アプリケーションである **MyHealthClinic** (MHC) を使用し、**Azure DevOps** を使用して**Azure Kubernetes Service (AKS)** で実行されている **Kubernetes** クラスターにデプロイします。
+> フロントの **Load Balancer** やバックエンドの **Redis Cache** などのデプロイメントとサービスをスピンアップするための定義で構成される **mhc-aks.yaml** マニフェスト ファイルがあります。MHC アプリケーションは、ロード バランサーと共に **mhc-front** ポッドで実行されます。
        
 ![AKS Workflow](images/aksworkflow.png)
 
-If you are new to Kubernetes, [click here](documentation/readme.md){:target="_blank"} for description of terminology used in this lab.
+Kubernetes を初めて使用する方向けに、この実習で使用する用語説明のリンクが [こちら](documentation/readme.md) にまとめられています。
 
-### What's covered in this lab
+### このラボで取り上げる内容
 
-The following tasks will be performed:
+次のタスクを実習します。
 
-* Create an Azure Container Registry (ACR), AKS and Azure SQL server
+* Azure Container Registry (ACR), AKS and Azure SQL server の作成
 
-* Provision the Azure DevOps Team Project with a .NET Core application using the Azure DevOps Demo Generator tool.
+* Azure DevOps Demo Generator ツールを利用した .NET Core アプリケーションの Azure DevOps チーム プロジェクトをプロビジョニングする
 
-* Configure application and database deployment, using Continuous Deployment (CD) in the Azure DevOps
+* Azure DevOps の継続的デプロイ (CD) を使用して、アプリケーションとデータベースのデプロイを構成する
 
-* Initiate the build to automatically deploy the application
+* Azure Boards でのワークアイテム作成から Pull Request によるソースコード修正によるアプリケーションの自動ビルドとデプロイの基本的なワークフローをおこなう
 
-## Before you begin
+## 環境準備
 
-1. Refer the [Getting Started](../Setup/) page to know the prerequisites for this lab.
+1. [はじめに](../Setup/) を参照して、この演習に必要な事前準備を確認します。
 
-1. Click the [Azure DevOps Demo Generator](http://azuredevopsdemogenerator.azurewebsites.net/?TemplateId=77372&Name=AKS){:target="_blank"} link and follow the instructions in [Getting Started](../Setup/) page to provision the project to your **Azure DevOps**.
+2. [Azure DevOps デモ ジェネレータ](http://azuredevopsdemogenerator.azureweb.net/?TemplateId=77372&Name=AKS) リンクをクリックし、ベースとなるデモプロジェクトを **Azure DevOps** にプロビジョニングします。
 
-For this lab the **Azure Kubernetes Service** template is used which is already selected when you click on the link above. There are some additional extensions required for this lab and can be automatically installed during the process.
+このラボでは、上記のリンクをクリックすると既に選択されている **Azure Kubernetes Service** テンプレートが使用されます。この演習には、いくつかの追加の拡張機能が必要であり、プロセス中に自動的にインストールできます。
 
 ![AKS Template|50%](images/akstemplate.png)
 
-## Setting up the environment
+## 環境のセットアップ
 
-The following azure resources need to be configured for this lab:
+このラボでは次の Azure のリソースの構成が必要になります。
 
 |Azure resources                      | Description|
 |-------------------------------------|------------|
-|![Azure Container Registry](images/container_registry.png) Azure Container Registry | Used to store the Docker images privately|
-|![AKS](images/aks.png) AKS | Docker images are deployed to Pods running inside AKS|
-|![Azure SQL Server](images/sqlserver.png) Azure SQL Server | SQL Server on Azure to host database|
+|![Azure Container Registry](images/container_registry.png) Azure Container Registry | プライベートな Docker イメージの格納に使用します |
+|![AKS](images/aks.png) AKS | Azure 上に構成されるマネージドな Kubernetes サービスで、AKS 内のポッドに Docker イメージがデプロイされます|
+|![Azure SQL Database](images/sqlserver.png) Azure SQL Dtabase | Azure 上に構成されるマネージドな SQL データベース サービスです|
 
-1. Launch the [Azure Cloud Shell](https://docs.microsoft.com/en-in/azure/cloud-shell/overview){:target="_blank"} from the Azure portal and choose **Bash**.
+### Azure Cloud Shell を使った Azure リソースの準備
 
-1. **Deploy Kubernetes to Azure, using CLI**:
+1. Azure 管理ポータルで [Azure Cloud Shell](https://docs.microsoft.com/en-in/azure/cloud-shell/overview) を開き、**Bash** を選択します。
 
-   i. Get the latest available Kubernetes version in your preferred region into a bash variable. Replace `<region>` with the region of your choosing, for example eastus.
+2. **CLI を使った AKS の作成**:
+
+   i. ご希望のリージョンで利用可能な最新の Kubernetes バージョンを bash 変数に取得します。`<region>` を使用したいデータセンターリージョン (例えば `japaneast` ) に置き換えます。
 
       ```bash
      version=$(az aks get-versions -l <region> --query 'orchestrators[-1].orchestratorVersion' -o tsv)
       ```
    
-   ii. Create a Resource Group
+   ii. リソースグループ `akshandsonlab` を作成します。
 
     ```bash
      az group create --name akshandsonlab --location <region>
     ```
 
-   iii. Create AKS using the latest version available
-    
-    ```bash
-    az aks create --resource-group akshandsonlab --name <unique-aks-cluster-name> --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <region>
-    ```
-    {% include important.html content= "Enter a unique AKS cluster name. AKS name must contain between 3 and 31 characters inclusive. The name can contain only letters, numbers, and hyphens. The name must start with a letter and must end with a letter or a number. The AKS deployment may take 10-15 minutes" %}
+   iii. AKS を作成します。
 
-1. **Deploy Azure Container Registry(ACR)**: Run the below command to create your own private container registry using Azure Container Registry (ACR).
+    ```bash
+    az aks create --resource-group akshandsonlab --name <unique-aks-cluster-name> --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <region>　--node-vm-size Standard_DS1_v2
+    ```
+    
+    `<unique-aks-cluster-name>` に一意の AKS クラスター名を入力します。AKS 名には、3 - 31 文字数で、文字、数字、およびハイフンのみを含めることができます。名前は文字で始まる必要があり、文字または数字で終わる必要があります。AKS の展開には 10 - 15 分かかる場合があります。
+    
+3. **Azure Container Registry(ACR) の作成**:
+   
+   次のコマンドを実行して、Azure コンテナー レジストリ (ACR) を使用したプライベート コンテナー レジストリを作成します。
 
     ```bash
     az acr create --resource-group akshandsonlab --name <unique-acr-name> --sku Standard --location <region>
     ```
-    {% include important.html content= "Enter a unique ACR name. ACR name may contain alpha numeric characters only and must be between 5 and 50 characters" %}
-1. **Grant AKS-generated Service Principal access to ACR** : Authorize the AKS cluster to connect to the Azure Container Registry using the AKS generated Service Principal. Replace the variables `$AKS_RESOURCE_GROUP, $AKS_CLUSTER_NAME, $ACR_RESOURCE_GROUP` with appropriate values below and run the commands.
+    `<unique-acr-name>` に一意の ACR 名を入力します。ACR 名には英数字のみを含める場合があり、5 - 50 文字の間でなければなりません。
+
+4. **AKS サービス プリンシパル アクセスを ACR に付与する**:
+   
+   AKS サービス プリンシパルを使用して、AKS クラスターが Azure コンテナー レジストリ (ACR) に接続することを承認します。`<aks-cluster-name>` と `<acr-name>` を先に作成した名前に置き換え、以下のコマンドを実行します。
 
     ```bash
     # Get the id of the service principal configured for AKS
-    CLIENT_ID=$(az aks show --resource-group $AKS_RESOURCE_GROUP --name $AKS_CLUSTER_NAME --query "servicePrincipalProfile.clientId" --output tsv)
+    CLIENT_ID=$(az aks show --resource-group akshandsonlab --name <aks-cluster-name> --query "servicePrincipalProfile.clientId" --output tsv)
 
     # Get the ACR registry resource id
-    ACR_ID=$(az acr show --name $ACR_NAME --resource-group $ACR_RESOURCE_GROUP --query "id" --output tsv)
+    ACR_ID=$(az acr show --name <acr-name> --resource-group akshandsonlab --query "id" --output tsv)
 
    # Create role assignment
    az role assignment create --assignee $CLIENT_ID --role acrpull --scope $ACR_ID
    ```
 
-   > For more information see document on how to  [Authenticate with Azure Container Registry from Azure Kubernetes Service](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-auth-aks){:target="_blank"}
-1. **Create Azure SQL server and Database**: 
-    Create an Azure SQL server.
+   > 詳細な情報はこちらのドキュメントも参照してください：[Authenticate with Azure Container Registry from Azure Kubernetes Service](https://docs.microsoft.com/en-us/azure/container-registry/container-registry-auth-aks)
+
+5. **Azure SQL Database の作成**:
+   
+   次のコマンドを実行して Azure SQL Database サーバーを作成します。
+   
+   `<unique-sqlserver-name>` には一意の Azure SQL Database サーバー名を入力します。サーバー名は大文字を使用した命名規則 (Camel 形式など) をサポートしていないため、全て小文字を使用します。
     
     ```bash
     az sql server create -l <region> -g akshandsonlab -n <unique-sqlserver-name> -u sqladmin -p P2ssw0rd1234
     ```
+    
+    続いて、次のコマンドを実行してデータベースを作成します。
 
-    Create a database
+    `<unique-sqlserver-name>` には、先に作成した SQL Database サーバー名を指定します。
 
     ```bash
-    az sql db create -g akshandsonlab -s <unique-sqlserver-name> -n mhcdb --service-objective S0
+    az sql db create -g akshandsonlab -s <unique-sqlserver-name> -n mhcdb --service-objective Basic --max-size 100M
     ```
-      {% include important.html content= "Enter a unique SQL server name. Since the Azure SQL Server name does not support **UPPER** / **Camel** casing naming conventions, use lowercase for the ***SQL Server Name*** field value." %}
-1. The following components - **Container Registry**, **Kubernetes Service**, **SQL Server** along with **SQL Database** are deployed. Access each of these components individually and make a note of the details which will be used in Exercise 1.
+
+    次に、SQL Database サーバーのファイアウォールの設定を行います。次のコマンドを実行して、Azure サービスからのアクセスを許可します。
+
+    ```bash
+    az sql server firewall-rule create -g akshandsonlab -s <unique-sqlserver-name> -n AllowAllWindowsAzureIps --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
+    ```
+
+6. 以上で次のコンポーネント - **Azure コンテナー レジストリ (ACR)**、**Azure Kubernetes Service (AKS)**、**Azure SQL Database** が展開されます。これらの各コンポーネントに個別にアクセスし、演習 1 で使用する詳細をメモします。
    
    ![Deploy to Azure](images/azurecomponents.png)
-1. Select the **mhcdb** SQL database and make a note of the **Server name**.
+
+7. SQL Database の **mhcdb** を選択して、**サーバー名** をメモします。
 
    ![Deploy to Azure](images/getdbserverurl.png)
 
-1. Navigate to the resource group, select the created container registry and make a note of the **Login server** name.
+8. リソース グループに移動し、作成されたコンテナー レジストリを選択し、**ログイン サーバー** 名をメモします。
 
     ![Deploy to Azure](images/getacrserver.png)
 
-Now you have all the required azure components to follow this lab.
+これで、このラボの演習をおこなうために必要なすべての Azure リソースの準備が完了しました。
 
+## 演習 1: ビルド & リリース パイプラインの構成
 
-## Exercise 1: Configure Build and Release pipeline
+[Azure DevOps デモ ジェネレータ](http://azuredevopsdemogenerator.azurewebweb.net/?TemplateId=77372&Name=AKS) を通じて、Azure DevOps 組織で AKS プロジェクトを作成していることを確認します (詳細は環境準備の章を参照してください)。AKS や Azure コンテナー レジストリ (ACR) などの Azure リソースをビルド定義とリリース定義に手動でマップします。
+
+1. Azure DevOps で作成したチームプロジェクトを開き、**Pipelines → Pipelines** を表示します。
 
-Make sure that you have created the AKS project in your Azure DevOps organization through [Azure DevOps Demo Generator](http://azuredevopsdemogenerator.azurewebsites.net/?TemplateId=77372&Name=AKS) (as mentioned in pre-requisites). We will manually map Azure resources such as AKS and Azure Container Registry to the build and release definitions.
-
-1. Navigate to **Pipelines --> Pipelines**. 
-   
       ![build](images/pipelines.png)
 
-1. Select **MyHealth.AKS.Build** pipeline and click **Edit**.
+2. **MyHealth.AKS.build** pipeline を選択して **Edit** をクリックします。
    
    ![build](images/editbuild.png)
 
-1. In **Run services** task, select your Azure subscription from **Azure subscription** dropdown. Click **Authorize**.
+3. **Run services** タスクで、**Azure subscription** ドロップダウンリストから使用する Azure サブスクリプションを選択して、**Authorize** をクリックします。
 
     ![azureendpoint](images/endpoint.png)
 
-    You will be prompted to authorize this connection with Azure credentials. Disable pop-up blocker in your browser if you see a blank screen after clicking the OK button, and please retry the step.
+    Azure 資格情報との接続の認証を求められます。[OK] ボタンをクリックした後に空白の画面が表示された場合は、ブラウザでポップアップ ブロッカーを無効にし、手順を再試行してください。
 
-     This creates an **Azure Resource Manager Service Endpoint**, which defines and secures a connection to a Microsoft Azure subscription, using Service Principal Authentication (SPA). This endpoint will be used to connect **Azure DevOps** and **Azure**.
+    これにより、サービス プリンシパル認証 (SPA) を使用して Microsoft Azure サブスクリプションへの接続を定義し、合わせてセキュリティで保護する **Azure Resource Manager Service Endpoint** が作成されます。このエンドポイントは、**Azure DevOps** および **Azure** の接続に使用されます。
 
-     {% include tip.html content= "If your subscription is not listed or to specify an existing service principal, follow the [Service Principal creation](https://docs.microsoft.com/en-us/azure/devops/pipelines/library/connect-to-azure?view=vsts){:target=\"_blank\"} instructions." %}
+    > サブスクリプションが一覧表示されていない場合、または既存のサービス プリンシパルを指定する場合は、[サービス プリンシパルの作成](https://docs.microsoft.com/en-us/azure/devops/pipelines/library/connect-to-azure?view=vsts) を参照してください。
 
-1. Following the successful authentication, select appropriate values from the dropdown - **Azure subscription** and **Azure Container Registry** as shown. 
+4. 認証が成功した後、ドロップダウン - **Azure subscription** および **Azure Container Registry** で適切な値を選択します。
 
-   Repeat this for the **Build services, Push services** and **Lock services** tasks in the pipeline. 
+5. パイプライン内の **Build services**、**Push services**、および **Lock services** タスクについてもこの手順を繰り返します。
 
     ![updateprocessbd](images/acr.png)
 
+    各ビルドタスクの概要は下記の通りです。
 
     |Tasks|Usage|
     |-----|-----|
-    |**Replace tokens**| replace ACR in **mhc-aks.yaml** and database connection string in **appsettings.json**|
-    |![icon](images/icon.png) **Run services**| prepares suitable environment by pulling required image such as aspnetcore-build:1.0-2.0 and restoring packages mentioned in **.csproj**|
-    |![icon](images/icon.png) **Build services**| builds the docker images specified in a **docker-compose.yml** file and tags images with **$(Build.BuildId)** and **latest**|
-    |![icon](images/icon.png) **Push services**| pushes the docker image **myhealth.web** to Azure Container Registry|
-    |![publish-build-artifacts](images/publish-build-artifacts.png) **Publish Build Artifacts**| publishes **mhc-aks.yaml** & **myhealth.dacpac** files to artifact drop location in Azure DevOps so that they can be utilized in Release Definition|
+    |**Replace tokens**| **mhc-aks.yaml** 内の ACR 名と **appsettings.json** 内のデータベース接続文字列を置き換えます|
+    |![icon](images/icon.png) **Run services**| aspnetcore-build:1.0-2.0 などの必要なイメージをプルして、**.csproj** で記述されているパッケージを復元することで、ビルドに適切な環境を準備します|
+    |![icon](images/icon.png) **Build services**| **docker-compose.yml** ファイルで指定された Docker イメージをビルドし、**$(Build.BuildId)** と **latest** のタグを追加します|
+    |![icon](images/icon.png) **Push services**| Docker イメージ **myhealth.web** を Azure Container Registry (ACR) にプッシュします|
+    |![publish-build-artifacts](images/publish-build-artifacts.png) **Publish Build Artifacts**| **mhc-aks.yaml** と **myhealth.dacpac** ファイルを Azure DevOps 内の Artifact ドロップ場所にプッシュし、リリース定義で使用できるようにします|
 
-    **applicationsettings.json** file contains details of the database connection string used to connect to Azure database which was created in the beginning of this lab.
-    
-   > **mhc-aks.yaml** manifest file contains configuration details of **deployments**, **services** and **pods** which will be deployed in Azure Kubernetes Service. The manifest file will look like as below
+    > **applicationsettings.json** ファイルには、この演習の冒頭で作成された Azure Database への接続に使用されるデータベース接続文字列の詳細が含まれています。
+
+   > **mhc-aks.yaml** マニフェスト ファイルには、Azure Kubernetes Service (AKS) にデプロイされる **deployments**、**services**、**pods** の構成の詳細が含まれています。マニフェスト ファイルは次のようになります。
 
       ![](images/aksmanifest.png)
 
-   > For more information on the deployment manifest, see [AKS Deployments and YAML manifests](https://docs.microsoft.com/en-us/azure/aks/concepts-clusters-workloads#deployments-and-yaml-manifests)
+   > Deployment Manifest についての詳細な情報はこちらをご参照ください：[AKS Deployments and YAML manifests](https://docs.microsoft.com/en-us/azure/aks/concepts-clusters-workloads#deployments-and-yaml-manifests)
 
-1. Click on the **Variables** tab.
+6. **Variables** タブをクリックします
       
     ![](images/variables.png)
 
-     Update **ACR** and **SQLserver** values for **Pipeline Variables** with the details noted earlier while configuring the environment. 
+    **Pipeline Variables** で使用する **ACR** および **SQLserver** の値を、環境のセットアップの章でサービスを作成した時に指定した名前で更新します。
+
     ![updateprocessbd](images/updatevariablesbd.png)
 
-1. **Save** the changes.
+7. **Save & queue** の **Save** (Save & queue ではない) をクリックして変更を保存します
 
     ![updateprocessbd](images/savebuild.png)
 
-1. Navigate to **Pipelines \| Releases**. Select **MyHealth.AKS.Release** pipeline and click **Edit**.
+8. **Pipelines \| Releases** に移動し、 **MyHealth.AKS.Release** pipeline を選択して **Edit** をクリックします
 
    ![release](images/release.png)
 
-1. Select Dev stage and click **View stage tasks** to view the pipeline tasks.
+9. **Dev** stage を選択して **View stage tasks** をクリックし、パイプライン タスクを表示します
 
    ![releasetasks](images/viewstagetasks.png)
 
-1. In the **Dev** environment, under the **DB deployment** phase, select **Azure Resource Manager** from the drop down for **Azure Service Connection Type**,  update the **Azure Subscription** value from the dropdown for **Execute Azure SQL: DacpacTask** task.
+10. **Dev** 環境では、**DB deployment** フェーズの **Execute Azure SQL: DacpacTask** タスクにある **Azure Service Connection Type** のドロップダウンから **Azure Resource Manager** を選択し、
+**Azure Subscription** ドロップダウンから **Available Azure service connections** に表示される Azure サブスクリプションへの接続名を選択します。
 
     ![update_CD3](images/dbdeploytask.png)
 
-1. In the **AKS deployment** phase, select **Create Deployments & Services in AKS** task. 
+1. **AKS deployment** フェーズの **Create Deployments & Services in AKS** タスクを選択します。
       
     ![](images/aksdeploytask.png)
 
-    Update the **Azure Subscription**, **Resource Group** and **Kubernetes cluster** from the dropdown. Expand the **Secrets** section and update the parameters for **Azure subscription** and **Azure container registry** from the dropdown. 
+    **Azure subscription**、**Resource Group**、**Kubernetes cluster** の各ドロップダウンリストの値を更新します。続いて **Secrets** セクションを開き、 **Azure subscription** と **Azure container registry** の値をドロップダウンから更新します。
     
-    Repeat similar steps for **Update image in AKS** task.
+    **Update image in AKS** タスクにおいても同様の設定を行います。
      
      ![](images/aksdeploytask2.png)
     
+    * **Create Deployments & Services in AKS** タスクは **mhc-aks.yaml** ファイルで指定された構成に従い、AKS に deployments と services を作成します。最初のポッドは最新の Docker イメージがプルされて作成されます。
+    * **Update image in AKS** は、指定されたリポジトリから BuildID に対応する適切なイメージをプルアップし、AKSで実行されている**mhc-front pod** に Docker イメージをデプロイします。
+    * **mysecretkey** という secret が、コマンド `kubectl create secret` を使用して、Azure DevOps を介してバックグラウンドで AKS クラスターに作成されます。この secret は、Azure コンテナー レジストリ (ACR) から `myhealth.web` イメージを取得する場合の認証に使用されます。
 
-    * **Create Deployments & Services in AKS** will create the deployments and services in AKS as per the configuration specified in **mhc-aks.yaml** file. The Pod, for the first time will pull up the latest docker image.
-
-    * **Update image in AKS** will pull up the appropriate image corresponding to the BuildID from the repository specified, and deploys the docker image to the **mhc-front pod** running in AKS.
-
-    * A secret called **mysecretkey** is created in AKS cluster through Azure DevOps by using command `kubectl create secret` in the background. This secret will be used for authorization while pulling myhealth.web image from the Azure Container Registry.
-
-
-1. Select the **Variables** section under the release definition, update **ACR** and **SQLserver** values for **Pipeline Variables** with the details noted earlier while configuring the environment. Select the **Save** button.
-
-   {% include note.html content= "The **Database Name** is set to **mhcdb** and the **Server Admin Login** is **sqladmin** and **Password** is **P2ssw0rd1234**. If you have entered different details while creating Azure SQL server, update the values accordingly" %}
+2. リリース定義の **Variables** セクション タブを選択し、**Pipeline Variables** にある **ACR** と **SQLserver** の値を、環境のセットアップの章でサービスを作成した時に指定した名前で更新し、**Save** ボタンをクリックします。
+   
+   > **Database Name** は **mhcdb** に、**Server Admin Login** は **sqladmin** に、**Password** は **P2ssw0rd1234** に設定されています。もし、Azure SQL Database サーバーの作成中に異なる詳細を入力した場合は、それに応じて値を更新します。
 
    ![releasevariables](images/releasevariables.png)
 
-## Exercise 2: Trigger a Build and deploy application
+## 演習 2: Trigger a Build and deploy application
 
 In this exercise, let us trigger a build manually and upon completion, an automatic deployment of the application will be triggered. Our application is designed to be deployed in the pod with the **load balancer** in the front-end and **Redis cache** in the back-end.
 
@@ -224,40 +237,40 @@ In this exercise, let us trigger a build manually and upon completion, an automa
 
     ![manualbuild](images/runpipeline.png)
 
-1. Once the build process starts, select the build job to see the build in progress.
+2. Once the build process starts, select the build job to see the build in progress.
     
     ![clickbuild](images/buildprogress.gif)
     
 
-1. The build will generate and push the docker image to ACR. After the build is completed, you will see the build summary. To view the generated images navigate to the Azure Portal, select the **Azure Container Registry** and navigate to the **Repositories**.
+3. The build will generate and push the docker image to ACR. After the build is completed, you will see the build summary. To view the generated images navigate to the Azure Portal, select the **Azure Container Registry** and navigate to the **Repositories**.
 
     ![imagesinrepo](images/imagesinrepo.png)
 
-1. Switch back to the Azure DevOps portal. Select the **Releases** tab in the **Pipelines** section and double-click on the latest release. Select **In progress** link to see the live logs and release summary.
+4. Switch back to the Azure DevOps portal. Select the **Releases** tab in the **Pipelines** section and double-click on the latest release. Select **In progress** link to see the live logs and release summary.
 
     ![releaseinprog](images/releaseinprog.png)
 
     ![release_summary1](images/release_summary1.png)
 
-1. Once the release is complete, launch the [Azure Cloud Shell](https://docs.microsoft.com/en-in/azure/cloud-shell/overview) and run the below commands to see the pods running in AKS:
+5. Once the release is complete, launch the [Azure Cloud Shell](https://docs.microsoft.com/en-in/azure/cloud-shell/overview) and run the below commands to see the pods running in AKS:
 
     1. Type **`az aks get-credentials --resource-group yourResourceGroup --name yourAKSname`** in the command prompt to get the access credentials for the Kubernetes cluster. Replace the variables `yourResourceGroup` and `yourAKSname` with the actual values.
 
          ![Kubernetes Service Endpoint](images/getkubeconfig.png)
 
-    1. **`kubectl get pods`**
+    2. **`kubectl get pods`**
 
         ![getpods](images/getpods.png)
 
         The deployed web application is running in the displayed pods.
 
-1. To access the application, run the below command. If you see that **External-IP** is pending, wait for sometime until an IP is assigned.
+6. To access the application, run the below command. If you see that **External-IP** is pending, wait for sometime until an IP is assigned.
 
     **`kubectl get service mhc-front --watch`**
 
     ![watchfront](images/watchfront.png)
 
-1. Copy the **External-IP** and paste it in the browser and press the Enter button to launch the application.
+7. Copy the **External-IP** and paste it in the browser and press the Enter button to launch the application.
 
     ![finalresult](images/finalresult.png)
 

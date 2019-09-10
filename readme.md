@@ -32,7 +32,7 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
 
 1. [はじめに](../Setup/) を参照して、この演習に必要な事前準備を確認します。
 
-2. [Azure DevOps デモ ジェネレータ](http://azuredevopsdemogenerator.azureweb.net/?TemplateId=77372&Name=AKS) リンクをクリックし、ベースとなるデモプロジェクトを **Azure DevOps** にプロビジョニングします。
+2. [Azure DevOps デモ ジェネレータ](https://azuredevopsdemogenerator.azurewebsites.net/?TemplateId=77372&Name=AKS) リンクをクリックし、ベースとなるデモプロジェクトを **Azure DevOps** にプロビジョニングします。
 
 このラボでは、上記のリンクをクリックすると既に選択されている **Azure Kubernetes Service** テンプレートが使用されます。この演習には、いくつかの追加の拡張機能が必要であり、プロセス中に自動的にインストールできます。
 
@@ -140,7 +140,7 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
 
 ## 演習 1: ビルド & リリース パイプラインの構成
 
-[Azure DevOps デモ ジェネレータ](http://azuredevopsdemogenerator.azurewebweb.net/?TemplateId=77372&Name=AKS) を通じて、Azure DevOps 組織で AKS プロジェクトを作成していることを確認します (詳細は環境準備の章を参照してください)。AKS や Azure コンテナー レジストリ (ACR) などの Azure リソースをビルド定義とリリース定義に手動でマップします。
+[Azure DevOps デモ ジェネレータ](https://azuredevopsdemogenerator.azurewebsites.net/?TemplateId=77372&Name=AKS) を通じて、Azure DevOps 組織で AKS プロジェクトを作成していることを確認します (詳細は環境準備の章を参照してください)。AKS や Azure コンテナー レジストリ (ACR) などの Azure リソースをビルド定義とリリース定義に手動でマップします。
 
 1. Azure DevOps で作成したチームプロジェクトを開き、**Pipelines → Pipelines** を表示します。
 
@@ -282,14 +282,9 @@ Kubernetes includes a web dashboard that can be used for basic management operat
 
 ## Summary
 
-[**Azure Kubernetes Service (AKS)**](https://azure.microsoft.com/en-us/services/container-service/){:target="_blank"}  reduces the complexity and operational overhead of managing a Kubernetes cluster by offloading much of that responsibility to the Azure. With **Azure DevOps** and **Azure Container Services (AKS)**, we can build DevOps for dockerized applications by leveraging docker capabilities enabled on Azure DevOps Hosted Agents.
+[**Azure Kubernetes Service (AKS)**](https://azure.microsoft.com/en-us/services/container-service/) reduces the complexity and operational overhead of managing a Kubernetes cluster by offloading much of that responsibility to the Azure. With **Azure DevOps** and **Azure Container Services (AKS)**, we can build DevOps for dockerized applications by leveraging docker capabilities enabled on Azure DevOps Hosted Agents.
 
 
 ## Reference
 
-Thanks to **Mohamed Radwan** for making a video on this lab. You can watch the following video that walks you through all the steps explained in this lab
-
-<figure class="video_container">
-  <iframe width="560" height="315" src="https://www.youtube.com/embed/4DUhc0MjdUc" frameborder="0" allowfullscreen="true"> </iframe>
-</figure>
-
+TBD

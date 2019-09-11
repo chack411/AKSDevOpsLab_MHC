@@ -288,9 +288,9 @@ Kubernetes には、基本的な管理操作に使用できる Web ダッシュ�
 
 演習が完了したら、次のコマンドを使って、リソース グループ、コンテナー サービス、およびすべての関連リソースを削除します。
 
-    ```bash
-    az group delete --name akshandsonlab --yes --no-wait
-    ```
+```bash
+az group delete --name akshandsonlab --yes --no-wait
+```
 
 > リソースを使用し続ける場合には削除しなくても構いませんが、継続して課金がされることに注意してください。
 

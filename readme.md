@@ -69,7 +69,7 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
    iii. AKS を作成します。
 
     ```bash
-    az aks create --resource-group akshandsonlab --name <unique-aks-cluster-name> --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <region>　--node-vm-size Standard_DS1_v2
+    az aks create --resource-group akshandsonlab --name <unique-aks-cluster-name> --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <region> --node-vm-size Standard_DS1_v2
     ```
     
     `<unique-aks-cluster-name>` に一意の AKS クラスター名を入力します。AKS 名には、3 - 31 文字数で、文字、数字、およびハイフンのみを含めることができます。名前は文字で始まる必要があり、文字または数字で終わる必要があります。AKS の展開には 10 - 15 分かかる場合があります。
@@ -229,61 +229,76 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
 
    ![releasevariables](images/releasevariables.png)
 
-## 演習 2: Trigger a Build and deploy application
+## 演習 2: ビルドとデプロイの実行
 
-In this exercise, let us trigger a build manually and upon completion, an automatic deployment of the application will be triggered. Our application is designed to be deployed in the pod with the **load balancer** in the front-end and **Redis cache** in the back-end.
+この演習では、アプリケーションのビルドを手動実行し、完了すると自動デプロイが実行されることを確認します。このアプリケーションは、フロントエンドに **load balancer** を、バックエンドに **Redis cache** を含むポッドに展開するように設計されています。
 
-1. Select **MyHealth.AKS.build** pipeline. Click on **Run pipeline**
+1. **MyHealth.AKS.build** pipeline を選択して、**Run pipeline** をクリックします。
 
     ![manualbuild](images/runpipeline.png)
 
-2. Once the build process starts, select the build job to see the build in progress.
+2. ビルド プロセスが開始されたら、ビルド ジョブを選択して、ビルドの進行状況を確認します。
     
     ![clickbuild](images/buildprogress.gif)
-    
 
-3. The build will generate and push the docker image to ACR. After the build is completed, you will see the build summary. To view the generated images navigate to the Azure Portal, select the **Azure Container Registry** and navigate to the **Repositories**.
+3. ビルド タスクは、Docker イメージを生成して ACR にプッシュします。ビルドが完了すると、ビルドの概要が表示されます。生成されたイメージを Azure ポータルで確認するには、**Azure コンテナー レジストリ** を選択し、**リポジトリ** を表示します。
 
     ![imagesinrepo](images/imagesinrepo.png)
 
-4. Switch back to the Azure DevOps portal. Select the **Releases** tab in the **Pipelines** section and double-click on the latest release. Select **In progress** link to see the live logs and release summary.
+4. Azure DevOps ポータルの **Pipelines** セクションで **Releases** タブを選択し、最新リリースをクリックします。**In progress** リンクをクリックすると、ライブ ログとリリースの概要が表示されます。
 
     ![releaseinprog](images/releaseinprog.png)
 
     ![release_summary1](images/release_summary1.png)
 
-5. Once the release is complete, launch the [Azure Cloud Shell](https://docs.microsoft.com/en-in/azure/cloud-shell/overview) and run the below commands to see the pods running in AKS:
+5. リリースタスクが完了したら、[Azure Cloud Shell](https://docs.microsoft.com/en-in/azure/cloud-shell/overview) を開き、次のコマンドを実行して AKS のポッドを確認します。
 
-    1. Type **`az aks get-credentials --resource-group yourResourceGroup --name yourAKSname`** in the command prompt to get the access credentials for the Kubernetes cluster. Replace the variables `yourResourceGroup` and `yourAKSname` with the actual values.
+   まずはじめに、Kubernetes クラスターに接続するための資格情報を取得します。 `aks-cluster-name` は実際に演習で作成した名前を指定します。
+   
+    ```bash
+    az aks get-credentials --resource-group akshandsonlab --name <aks-cluster-name>
+    ```
+     ![Kubernetes Service Endpoint](images/getkubeconfig.png)
 
-         ![Kubernetes Service Endpoint](images/getkubeconfig.png)
+   続いて、次のコマンドを実行すると、実行中のポッドが一覧表示されます。
 
-    2. **`kubectl get pods`**
+    ```bash
+    kubectl get pods
+    ```
+    ![getpods](images/getpods.png)
 
-        ![getpods](images/getpods.png)
-
-        The deployed web application is running in the displayed pods.
-
-6. To access the application, run the below command. If you see that **External-IP** is pending, wait for sometime until an IP is assigned.
-
-    **`kubectl get service mhc-front --watch`**
-
+6. アプリケーションを表示するには、次のコマンドを実行して外部 IP アドレスを確認します。もし、**EXTERNAL-IP** が pending 状態の場合は、IP アドレスがアサインされるまで待ちます。
+   
+    ```bash
+    kubectl get service mhc-front --watch
+    ```
     ![watchfront](images/watchfront.png)
 
-7. Copy the **External-IP** and paste it in the browser and press the Enter button to launch the application.
+7. **EXTERNAL-IP** をコピーして、ブラウザーで表示します。次のようなアプリケーションが表示されます。
 
     ![finalresult](images/finalresult.png)
 
-### Access the Kubernetes web dashboard in Azure Kubernetes Service (AKS)
+### (補足) Azure Kubernetes Service (AKS) で Kubernetes Web ダッシュボードにアクセスする
 
-Kubernetes includes a web dashboard that can be used for basic management operations. This dashboard lets you view basic health status and metrics for your applications, create and deploy services, and edit existing applications. Follow [these instructions](https://docs.microsoft.com/en-us/azure/aks/kubernetes-dashboard) to access the Kubernetes web dashboard in Azure Kubernetes Service (AKS).
+Kubernetes には、基本的な管理操作に使用できる Web ダッシュボードが用意されています。このダッシュボードでは、アプリケーションの基本的な正常性ステータスとメトリックを表示したり、サービスを作成して展開したり、既存のアプリケーションを編集したりできます。Azure Kubernetes Service (AKS) の Kubernetes Web ダッシュボードにアクセスするには、[こちらの手順](https://docs.microsoft.com/en-us/azure/aks/kubernetes-dashboard) を参照してください。
 
 ![finalresult](images/aksdashboard.png)
 
-## Summary
+## 演習 3: 演習で使用したリソースを削除する
 
-[**Azure Kubernetes Service (AKS)**](https://azure.microsoft.com/en-us/services/container-service/) reduces the complexity and operational overhead of managing a Kubernetes cluster by offloading much of that responsibility to the Azure. With **Azure DevOps** and **Azure Container Services (AKS)**, we can build DevOps for dockerized applications by leveraging docker capabilities enabled on Azure DevOps Hosted Agents.
+演習が完了したら、次のコマンドを使って、リソース グループ、コンテナー サービス、およびすべての関連リソースを削除します。
 
+    ```bash
+    az group delete --name akshandsonlab --yes --no-wait
+    ```
+
+> リソースを使用し続ける場合には削除しなくても構いませんが、継続して課金がされることに注意してください。
+
+> AKS クラスターを削除しても、クラスターで使用されていた Azure Active Directory サービス プリンシパルは削除されません。サービス プリンシパルを削除する手順については、[AKS のサービス プリンシパルに関する考慮事項と削除](https://docs.microsoft.com/ja-jp/azure/aks/kubernetes-service-principal#additional-considerations) に関するページを参照してください。
+
+## まとめ
+
+[**Azure Kubernetes Service (AKS)**](https://azure.microsoft.com/en-us/services/container-service/) は、その責任の大部分を Azure にオフロードすることで、Kubernetes クラスターの管理の複雑さと運用上のオーバーヘッドを軽減します。合わせて、**Azure DevOps** および **Azure コンテナー レジストリ (ACR)** を使用すると、Docker アプリケーション用の DevOps 環境を構築できます。
 
 ## Reference
 

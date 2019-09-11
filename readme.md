@@ -54,22 +54,22 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
 
 2. **CLI を使った AKS の作成**:
 
-   i. ご希望のリージョンで利用可能な最新の Kubernetes バージョンを bash 変数に取得します。`<region>` を使用したいデータセンターリージョン (例えば `japaneast` ) に置き換えます。
+   i. ご希望のリージョンで利用可能な最新の Kubernetes バージョンを bash 変数に取得します。本演習では `japaneast` (東日本) のデータセンター リージョンの利用を前提にしていますが、もし他のリージョン (例えば `japanwest` ) などを利用したい場合には、各コマンドの `japaneast` 文字列を書き換えてください。
 
       ```bash
-     version=$(az aks get-versions -l <region> --query 'orchestrators[-1].orchestratorVersion' -o tsv)
+     version=$(az aks get-versions -l japaneast --query 'orchestrators[-1].orchestratorVersion' -o tsv)
       ```
    
    ii. リソースグループ `akshandsonlab` を作成します。
 
     ```bash
-     az group create --name akshandsonlab --location <region>
+     az group create --name akshandsonlab --location japaneast
     ```
 
    iii. AKS を作成します。
 
     ```bash
-    az aks create --resource-group akshandsonlab --name <unique-aks-cluster-name> --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location <region> --node-vm-size Standard_DS1_v2
+    az aks create --resource-group akshandsonlab --name <unique-aks-cluster-name> --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location japaneast --node-vm-size Standard_DS1_v2
     ```
     
     `<unique-aks-cluster-name>` に一意の AKS クラスター名を入力します。AKS 名には、3 - 31 文字数で、文字、数字、およびハイフンのみを含めることができます。名前は文字で始まる必要があり、文字または数字で終わる必要があります。AKS の展開には 10 - 15 分かかる場合があります。
@@ -79,7 +79,7 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
    次のコマンドを実行して、Azure コンテナー レジストリ (ACR) を使用したプライベート コンテナー レジストリを作成します。
 
     ```bash
-    az acr create --resource-group akshandsonlab --name <unique-acr-name> --sku Standard --location <region>
+    az acr create --resource-group akshandsonlab --name <unique-acr-name> --sku Standard --location japaneast
     ```
     `<unique-acr-name>` に一意の ACR 名を入力します。ACR 名には英数字のみを含める場合があり、5 - 50 文字の間でなければなりません。
 
@@ -107,7 +107,7 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
    `<unique-sqlserver-name>` には一意の Azure SQL Database サーバー名を入力します。サーバー名は大文字を使用した命名規則 (Camel 形式など) をサポートしていないため、全て小文字を使用します。
     
     ```bash
-    az sql server create -l <region> -g akshandsonlab -n <unique-sqlserver-name> -u sqladmin -p P2ssw0rd1234
+    az sql server create -l japaneast -g akshandsonlab -n <unique-sqlserver-name> -u sqladmin -p P2ssw0rd1234
     ```
     
     続いて、次のコマンドを実行してデータベースを作成します。

@@ -69,10 +69,18 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
    iii. AKS を作成します。
 
     ```bash
-    az aks create --resource-group akshandsonlab --name <unique-aks-cluster-name> --enable-addons monitoring --kubernetes-version $version --generate-ssh-keys --location japaneast --node-vm-size Standard_DS1_v2
+    az aks create --resource-group akshandsonlab \
+        --kubernetes-version $version \
+        --location japaneast \
+        --enable-addons monitoring \
+        --generate-ssh-keys \
+        --node-vm-size Standard_DS1_v2 \
+        --name <unique-aks-cluster-name>
     ```
     
     `<unique-aks-cluster-name>` に一意の AKS クラスター名を入力します。AKS 名には、3 - 31 文字数で、文字、数字、およびハイフンのみを含めることができます。名前は文字で始まる必要があり、文字または数字で終わる必要があります。AKS の展開には 10 - 15 分かかる場合があります。
+
+    > もし、AKS クラスター作成でエラーになる場合、[こちら](documentation/create_AKS.md) の手順を試してみてください。こちらの手順では、より詳細な AKS クラスター作成手順が書かれています。
     
 3. **Azure Container Registry(ACR) の作成**:
    

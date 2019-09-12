@@ -14,7 +14,7 @@ AKS を使用する最大の利点の 1 つは、クラウドでリソースを�
        
 ![AKS Workflow](images/aksworkflow.png)
 
-Kubernetes を初めて使用する方向けに、この実習で使用する用語説明のリンクが [こちら](documentation/readme.md) にまとめられています。
+Kubernetes を初めて使用する方向けに、この実習で使用する用語説明のリンクが [こちら](documentation/terminology.md) にまとめられています。
 
 ### このラボで取り上げる内容
 

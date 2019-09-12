@@ -1,18 +1,16 @@
-## Before you begin
+## 始める前に
 
-Welcome! We are excited you want to learn how to integrate Azure DevOps with open source tools. 
+ようこそ！ 演習を開始する前に、以下の環境を確認してください。
 
-Before you start following the labs, you need to complete the below tasks.
+## 前提条件
 
-## Prerequisites
+1. **Microsoft Azure Account**: 演習にはアクティブな Azure アカウントが必要です。お持ちでない場合は、[無料試用版](https://azure.microsoft.com/en-us/free/) にサインアップできます。
 
-1. **Microsoft Azure Account**: You will need a valid and active Azure account for the Azure labs. If you do not have one, you can sign up for a [free trial](https://azure.microsoft.com/en-us/free/). 
+2. 合わせて **Azure DevOps** アカウントが必要です。お持ちでない場合は、[こちら](https://azure.microsoft.com/en-us/services/devops/) からサインアップできます。
 
-1. You will need an **Azure DevOps** account. If you do not have one, you can sign up for free [here](https://azure.microsoft.com/en-us/services/devops/)
+## Azure DevOps Project の準備
 
-## Setting up the Azure DevOps Project
+**Azure DevOps デモ ジェネレータ** は、ソース コード、作業項目、イテレーション、サービス エンドポイント、ビルドおよびリリース定義を含むサンプル プロジェクトテンプレートを元にして、Azure DevOps 組織でチーム プロジェクトを作成することができます。
 
-**Azure DevOps Demo Generator** helps you create team projects on your Azure DevOps Organization with sample content that include source code, work items, iterations, service endpoints, build and release definitions based on the template you choose during the configuration.
-
-Follow the [simple walkthrough](https://docs.microsoft.com/en-us/azure/devops/demo-gen/use-vsts-demo-generator-v2?view=vsts) to create projects on your Azure DevOps Services organization with pre-populated sample content.
+Azure DevOps でサンプルコンテンツを元にしたプロジェクトを作成する場合にはこちらの [simple walkthrough](https://docs.microsoft.com/en-us/azure/devops/demo-gen/use-vsts-demo-generator-v2?view=vsts) もご参照ください。
 

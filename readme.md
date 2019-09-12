@@ -123,7 +123,7 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
     `<unique-sqlserver-name>` には、先に作成した SQL Database サーバー名を指定します。
 
     ```bash
-    az sql db create -g akshandsonlab -s <unique-sqlserver-name> -n mhcdb --service-objective Basic --max-size 100M
+    az sql db create -g akshandsonlab -s <unique-sqlserver-name> -n mhcdb --service-objective Basic --max-size 100MB
     ```
 
     次に、SQL Database サーバーのファイアウォールの設定を行います。次のコマンドを実行して、Azure サービスからのアクセスを許可します。
@@ -153,6 +153,8 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
 1. Azure DevOps で作成したチームプロジェクトを開き、**Pipelines → Pipelines** を表示します。
 
       ![build](images/pipelines.png)
+
+> もしも、**Pipelines** の下に **Builds** と表示されている場合は、Azure DevOps の右上隅にあるアカウントアイコンをクリックし、**Preview features** の **Multi-stage pipelines** を ON にします。
 
 2. **MyHealth.AKS.build** pipeline を選択して **Edit** をクリックします。
    
@@ -194,28 +196,44 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
 
 6. **Variables** タブをクリックします
       
-    ![](images/variables.png)
+    ![variables](images/variables.png)
 
     **Pipeline Variables** で使用する **ACR** および **SQLserver** の値を、環境のセットアップの章でサービスを作成した時に指定した名前で更新します。
 
     ![updateprocessbd](images/updatevariablesbd.png)
 
-7. **Save & queue** の **Save** (Save & queue ではない) をクリックして変更を保存します
+7. **Triggers** タブをクリックします
+      
+    初期設定では **Enable continuous integration** が Off になっていますので、この設定にチェックを入れて、リポジトリのソースコードが変更されたタイミングで自動でビルドパイプラインが実行されるようにします (演習 3 で動作を確認します)。
+
+    ![triggers](images/triggers.png)
+
+8. **Save & queue** の **Save** (Save & queue ではない) をクリックして変更を保存します
 
     ![updateprocessbd](images/savebuild.png)
 
-8. **Pipelines \| Releases** に移動し、 **MyHealth.AKS.Release** pipeline を選択して **Edit** をクリックします
+9. **Pipelines \| Releases** に移動し、 **MyHealth.AKS.Release** pipeline を選択して **Edit** をクリックします
 
    ![release](images/release.png)
 
-9. **Dev** stage を選択して **View stage tasks** をクリックし、パイプライン タスクを表示します
+10. **Dev** stage を選択して **View stage tasks** をクリックし、パイプライン タスクを表示します
 
    ![releasetasks](images/viewstagetasks.png)
 
-10. **Dev** 環境では、**DB deployment** フェーズの **Execute Azure SQL: DacpacTask** タスクにある **Azure Service Connection Type** のドロップダウンから **Azure Resource Manager** を選択し、
+11. **Dev** 環境では、まず **DB deployment** フェーズをクリックして **Agent pool** のドロップダウンから **Azure Pipelines** を選択し、
+**Agent Specification** ドロップダウンから **windows-2019** を選択します。
+
+    ![dbdeploy_pool](images/dbdeploy_pool.png)
+
+1. 続いて **DB deployment** フェーズの **Execute Azure SQL: DacpacTask** タスクにある **Azure Service Connection Type** のドロップダウンから **Azure Resource Manager** を選択し、
 **Azure Subscription** ドロップダウンから **Available Azure service connections** に表示される Azure サブスクリプションへの接続名を選択します。
 
     ![update_CD3](images/dbdeploytask.png)
+
+12. 次に **AKS deployment** フェーズをクリックして **Agent pool** のドロップダウンから **Azure Pipelines** を選択し、
+**Agent Specification** ドロップダウンから **ubuntu-16.04** を選択します。
+
+    ![aksdeploy_pool](images/aksdeploy_pool.png)
 
 1. **AKS deployment** フェーズの **Create Deployments & Services in AKS** タスクを選択します。
       
@@ -227,9 +245,11 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
      
      ![](images/aksdeploytask2.png)
     
-    * **Create Deployments & Services in AKS** タスクは **mhc-aks.yaml** ファイルで指定された構成に従い、AKS に deployments と services を作成します。最初のポッドは最新の Docker イメージがプルされて作成されます。
-    * **Update image in AKS** は、指定されたリポジトリから BuildID に対応する適切なイメージをプルアップし、AKSで実行されている**mhc-front pod** に Docker イメージをデプロイします。
-    * **mysecretkey** という secret が、コマンド `kubectl create secret` を使用して、Azure DevOps を介してバックグラウンドで AKS クラスターに作成されます。この secret は、Azure コンテナー レジストリ (ACR) から `myhealth.web` イメージを取得する場合の認証に使用されます。
+    > **Create Deployments & Services in AKS** タスクは **mhc-aks.yaml** ファイルで指定された構成に従い、AKS に deployments と services を作成します。最初のポッドは最新の Docker イメージがプルされて作成されます。
+
+    > **Update image in AKS** は、指定されたリポジトリから BuildID に対応する適切なイメージをプルアップし、AKSで実行されている**mhc-front pod** に Docker イメージをデプロイします。
+
+    > **mysecretkey** という secret が、コマンド `kubectl create secret` を使用して、Azure DevOps を介してバックグラウンドで AKS クラスターに作成されます。この secret は、Azure コンテナー レジストリ (ACR) から `myhealth.web` イメージを取得する場合の認証に使用されます。
 
 2. リリース定義の **Variables** セクション タブを選択し、**Pipeline Variables** にある **ACR** と **SQLserver** の値を、環境のセットアップの章でサービスを作成した時に指定した名前で更新し、**Save** ボタンをクリックします。
    
@@ -292,7 +312,11 @@ Kubernetes には、基本的な管理操作に使用できる Web ダッシュ�
 
 ![finalresult](images/aksdashboard.png)
 
-## 演習 3: 演習で使用したリソースを削除する
+## 演習 3: Work Item の作成からソースコードを修正して CI/CD を実行する
+
+TBD
+
+## 演習 4: 演習で使用したリソースを削除する
 
 演習が完了したら、次のコマンドを使って、リソース グループ、コンテナー サービス、およびすべての関連リソースを削除します。
 

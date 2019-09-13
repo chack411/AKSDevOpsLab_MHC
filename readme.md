@@ -168,7 +168,7 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
 
     これにより、サービス プリンシパル認証 (SPA) を使用して Microsoft Azure サブスクリプションへの接続を定義し、合わせてセキュリティで保護する **Azure Resource Manager Service Endpoint** が作成されます。このエンドポイントは、**Azure DevOps** および **Azure** の接続に使用されます。
 
-    > 上記の手順で Authorize に失敗する場合は、[手動で Servic Endpoint を作成する](create_SPA.md) を参照してください。
+    > 上記の手順で Authorize に失敗する場合は、[手動で Azure DevOps の Azure Service Connection を作成する](documentation/create_SPN.md) を参照してください。
 
     > また、サブスクリプションが一覧表示されていない場合、または既存のサービス プリンシパルを指定する場合は、[サービス プリンシパルの作成](https://docs.microsoft.com/en-us/azure/devops/pipelines/library/connect-to-azure?view=vsts) を参照してください。
 
@@ -320,28 +320,28 @@ Kubernetes には、基本的な管理操作に使用できる Web ダッシュ�
 
 1. **Azure DevOps - Boards** の **Sprints** 画面を表示します。
 
-   ![finalresult](images/sprints.png)
+   ![sprints](images/sprints.png)
 
 2. **To Do** エリアにある緑色の **[+] New item** をクリックして新しい作業項目 (Task) を作成します。
 
-   ![finalresult](images/newtask.png)
+   ![newtask](images/newtask.png)
 
 3. 作成した Task をドラッグ＆ドロップして **In Progress** エリアに移動します。この時、Task の State が In Progress になったことを確認します。
 
-   ![finalresult](images/newtaskinprogress.png)
+   ![newtaskinprogress](images/newtaskinprogress.png)
 
 4. Task をダブルクリックするか、Task のタイトルをクリックして Task の詳細を表示し、**Development** 項目にある **create a branch** をクリックします。
 
-   ![finalresult](images/newtaskbranch.png)
+   ![newtaskbranch](images/newtaskbranch.png)
 
 5. **Create a branch** ウィンドウで **Name** に作成するブランチ名を入力して **Create branch** ボタンをクリックします。
 
-   ![finalresult](images/createbranch.png)
+   ![createbranch](images/createbranch.png)
 
 6. 作成したブランチのリポジトリに移り、**src/MyHealth.Web/Views/Home/Index.cshtml** ファイルを開き、**Edit** ボタンをクリックして編集モードに移ります。
    > 本演習では、Web ブラウザ上で直接ソースコードの修正をおこないますが、通常はこのリポジトリをローカルの開発環境にクローンして、**Visual Studio** などの開発ツールを使って修正をおこなってから、リモートのリポジトリにプッシュして変更を反映する方法をとります。
 
-   ![finalresult](images/branchedit.png)
+   ![branchedit](images/branchedit.png)
 
 7. 本演習では、例としてメニュー表記の **Home** を次のように **★ホーム★** に変更していますが、任意の文字列に変更していただいて構いません。
     ```html
@@ -351,39 +351,39 @@ Kubernetes には、基本的な管理操作に使用できる Web ダッシュ�
         <li><a href="#">TOUR INSIDE</a></li>
     </ul>
     ```
-   ![finalresult](images/branchedit2.png)
+   ![branchedit2](images/branchedit2.png)
 
 8. ソースコードを修正したのち、**Commit** をクリックして修正をリポジトリに反映します。
 
-   ![finalresult](images/branchcommit.png)
+   ![branchcommit](images/branchcommit.png)
 
 9.  Commit が完了すると、ウィンドウ上部に **Create a pull request** のリンクが表示されますので、これをクリックして新しい Pull Request を作成します。
 
-   ![finalresult](images/createpr1.png)
+   ![createpr1](images/createpr1.png)
 
 10. **New Pull Request** の画面で、**Reviewers** にソースコードのレビューを依頼したいチームメンバーをドロップダウンリストから選択して（本演習では他のチームメンバーを設定していませんので、自分自身を選択します）、**Create** ボタンをクリックします。
 
-   ![finalresult](images/createpr2.png)
+   ![createpr2](images/createpr2.png)
 
 11. 次のような、Pull Request のレビュー画面が表示されますので、レビュアーの方は、**Files** タブなどを通して変更内容を確認し、問題なければ **Complete** ボタンをクリックし、続いて表示されるウィンドウで **Complete merge** をクリックして、変更をマスターブランチにマージします。
 
-   ![finalresult](images/prreview.png)
+   ![prreview](images/prreview.png)
 
 12. マージが完了すると、リンクされている作業項目の State が自動で Done に変更されます。
 
-   ![finalresult](images/taskdone.png)
+   ![taskdone](images/taskdone.png)
 
 12. マージが完了したのち、Azure DevOps の **Pipelines** - **Pipelines** を表示して、マスターブランチの更新によって自動でビルドパイプラインが実行されていることを確認します。
 
-   ![finalresult](images/triggerdpipeline.png)
+   ![triggerdpipeline](images/triggerdpipeline.png)
 
 13. ビルドタスクが完了したら、続いて **Pipelines** - **Releases** を表示して、リリースパイプラインが開始されていることを確認します。
 
-   ![finalresult](images/triggerdpipeline2.png)
+   ![triggerdpipeline2](images/triggerdpipeline2.png)
 
 14. リリースパイプラインの実行が完了したら、**演習 2 - 6, 7** の手順従い、アプリケーションが正しく更新されているか確認します。
 
-   ![finalresult](images/updatedapp.png)
+   ![updatedapp](images/updatedapp.png)
 
 ## 演習 4: 演習で使用したリソースを削除する
 

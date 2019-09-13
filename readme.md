@@ -168,7 +168,9 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
 
     これにより、サービス プリンシパル認証 (SPA) を使用して Microsoft Azure サブスクリプションへの接続を定義し、合わせてセキュリティで保護する **Azure Resource Manager Service Endpoint** が作成されます。このエンドポイントは、**Azure DevOps** および **Azure** の接続に使用されます。
 
-    > サブスクリプションが一覧表示されていない場合、または既存のサービス プリンシパルを指定する場合は、[サービス プリンシパルの作成](https://docs.microsoft.com/en-us/azure/devops/pipelines/library/connect-to-azure?view=vsts) を参照してください。
+    > 上記の手順で Authorize に失敗する場合は、[手動で Servic Endpoint を作成する](create_SPA.md)) を参照してください。
+
+    > また、サブスクリプションが一覧表示されていない場合、または既存のサービス プリンシパルを指定する場合は、[サービス プリンシパルの作成](https://docs.microsoft.com/en-us/azure/devops/pipelines/library/connect-to-azure?view=vsts) を参照してください。
 
 4. 認証が成功した後、ドロップダウン - **Azure subscription** および **Azure Container Registry** で適切な値を選択します。
 
@@ -367,7 +369,11 @@ Kubernetes には、基本的な管理操作に使用できる Web ダッシュ�
 
    ![finalresult](images/prreview.png)
 
-12. マージが完了したことを確認してから、Azure DevOps の **Pipelines** - **Pipelines** を表示して、マスターブランチの更新によって自動でビルドパイプラインが実行されていることを確認します。
+12. マージが完了すると、リンクされている作業項目の State が自動で Done に変更されます。
+
+   ![finalresult](images/taskdone.png)
+
+12. マージが完了したのち、Azure DevOps の **Pipelines** - **Pipelines** を表示して、マスターブランチの更新によって自動でビルドパイプラインが実行されていることを確認します。
 
    ![finalresult](images/triggerdpipeline.png)
 

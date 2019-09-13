@@ -117,8 +117,8 @@ az aks create --resource-group akshandsonlab \
     --generate-ssh-keys \
     --node-vm-size Standard_DS1_v2 \
     --name <unique-aks-cluster-name> \
-    --service-principal <appIdの値>> \
-    --client-secret <passwordの値>>
+    --service-principal <appIdの値> \
+    --client-secret <passwordの値>
 ```
 
 > `<unique-aks-cluster-name>` に一意の AKS クラスター名を入力します。AKS 名には、3 - 31 文字数で、文字、数字、およびハイフンのみを含めることができます。名前は文字で始まる必要があり、文字または数字で終わる必要があります。AKS の展開には 10 - 15 分かかる場合があります。

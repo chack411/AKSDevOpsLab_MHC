@@ -20,7 +20,7 @@ Kubernetes を初めて使用する方向けに、この実習で使用する用
 
 次のタスクを実習します。
 
-* Azure Container Registry (ACR), AKS and Azure SQL server の作成
+* Azure Container Registry (ACR), AKS, Azure SQL Database の作成
 
 * Azure DevOps Demo Generator ツールを利用した .NET Core アプリケーションの Azure DevOps チーム プロジェクトをプロビジョニングする
 
